@@ -4,10 +4,12 @@ WORKDIR /app
 COPY go.mod ./
 RUN go mod download
 COPY . .
-RUN go build -o app
+
+# Build the binary with static linking
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app
 
 # Stage 2: Minimal image for production
-FROM alpine
+FROM scratch
 WORKDIR /app
 COPY --from=builder /app/app .
 EXPOSE 8080

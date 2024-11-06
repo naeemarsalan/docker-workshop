@@ -5,19 +5,30 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080/api/mess
 
 function App() {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState([]);  // Initialize messages as an empty array
 
   useEffect(() => {
-    axios.get(API_URL).then((response) => {
-      setMessages(response.data);
-    });
+    axios.get(API_URL)
+      .then((response) => {
+        setMessages(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching messages:", error);
+        setMessages([]);  // Set to an empty array if fetching fails
+      });
   }, []);
 
   const submitMessage = () => {
-    axios.post(API_URL, { text: message }).then(() => {
-      setMessages([...messages, { text: message }]);
-      setMessage("");
-    });
+    if (message.trim()) {
+      axios.post(API_URL, { text: message })
+        .then(() => {
+          setMessages([...messages, { text: message }]);
+          setMessage("");
+        })
+        .catch((error) => {
+          console.error("Error posting message:", error);
+        });
+    }
   };
 
   return (
@@ -40,4 +51,5 @@ function App() {
 }
 
 export default App;
+
 

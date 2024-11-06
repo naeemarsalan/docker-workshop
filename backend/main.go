@@ -14,14 +14,36 @@ type Message struct {
 var messages []Message
 var mutex = &sync.Mutex{}
 
+func enableCORS(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")                   // Allow all origins
+	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS") // Allow specific HTTP methods
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")       // Allow specific headers
+}
+
 func getMessages(w http.ResponseWriter, r *http.Request) {
+	enableCORS(&w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	mutex.Lock()
-	json.NewEncoder(w).Encode(messages)
+	if len(messages) == 0 {
+		json.NewEncoder(w).Encode([]Message{}) // Return an empty array instead of null
+	} else {
+		json.NewEncoder(w).Encode(messages)
+	}
 	mutex.Unlock()
 }
 
 func postMessage(w http.ResponseWriter, r *http.Request) {
+	enableCORS(&w)
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	var message Message
 	json.NewDecoder(r.Body).Decode(&message)
 	mutex.Lock()
