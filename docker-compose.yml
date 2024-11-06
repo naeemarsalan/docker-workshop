@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.${ENV:-dev}
+    container_name: go_api
+    ports:
+      - "8080:8080"
+  
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.${ENV:-dev}
+    container_name: react_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8080/api/messages
+    depends_on:
+      - backend
+
